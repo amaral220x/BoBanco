@@ -13,9 +13,9 @@ public class BobancoApplication {
 		SpringApplication.run(BobancoApplication.class, args);
 	}
 
-	@GetMapping("/teste")
-	public String hello() {
-		return "Hello World!";
-	}
+	// @GetMapping("/teste")
+	// public String hello() {
+	// 	return "Hello World!";
+	// }
 
 }
