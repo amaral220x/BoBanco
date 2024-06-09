@@ -93,6 +93,18 @@ public class Cliente {
         this.rendaMensal = rendaMensal;
     }
 
+    public void setEmail(Email email) {
+        this.email = email;
+    }
+
+    public void setCpf(Cpf cpf) {
+        this.cpf = cpf;
+    }
+
+    public void setSenha(String senha) {
+        this.senha = senha;
+    }
+
     @Override
     public String toString() {
         return "Cliente [cpf=" +cpf+ ", email=" + email +", endereco=" + endereco + ", nome=" + nome + ", rendaMensal="

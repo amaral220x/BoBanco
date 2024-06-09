@@ -26,6 +26,11 @@ public class Email {
         this.email = email;
     }
 
+    public static boolean emailValido(String email) {
+        String regex = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$";
+        return email.matches(regex);
+    }
+
     @Override
     public String toString() {
         return email;

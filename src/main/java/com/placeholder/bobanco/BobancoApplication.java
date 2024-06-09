@@ -6,11 +6,16 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.placeholder.bobanco.model.entity.Cliente;
+
 import org.springframework.web.bind.annotation.GetMapping;
 
 @SpringBootApplication(exclude = SecurityAutoConfiguration.class)
 @RestController
 public class BobancoApplication {
+
+	static Cliente clienteLogado = null;
 
 	public static void main(String[] args) {
 		SpringApplication.run(BobancoApplication.class, args);
@@ -20,5 +25,12 @@ public class BobancoApplication {
 	// public String hello() {
 	// 	return "Hello World!";
 	// }
+
+	public static void setClienteLogado(Cliente cliente) {
+		clienteLogado = cliente;
+	}
+	public static Cliente getClienteLogado() {
+		return clienteLogado;
+	}
 
 }
