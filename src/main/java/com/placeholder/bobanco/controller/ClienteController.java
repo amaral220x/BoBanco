@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -216,6 +217,20 @@ public class ClienteController {
         }
         repository.save(clienteObj);
         Map<String, String> response = Map.of("message", "Cliente atualizado");
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/delete/{cpf}")
+    public ResponseEntity<Object> delete(@PathVariable String cpf){
+        Cpf cpfObj = new Cpf(cpf);
+        Optional<Cliente> cliente = repository.findByCpf(cpfObj);
+        if(cliente.isEmpty()){
+            System.out.println("Cliente não encontrado");
+            Map<String, String> response = Map.of("message", "Cliente não encontrado");
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+        repository.delete(cliente.get());
+        Map<String, String> response = Map.of("message", "Cliente deletado");
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
