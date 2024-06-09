@@ -11,10 +11,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import com.placeholder.bobanco.repository.ClienteRepository;
+import com.placeholder.bobanco.utils.SenhaUtils;
 import com.placeholder.bobanco.exception.ClienteException;
 import com.placeholder.bobanco.model.entity.Cliente;
 import com.placeholder.bobanco.model.value.Cpf;
 import com.placeholder.bobanco.model.value.Email;
+
 
 import java.util.List;
 import java.util.Optional; 
@@ -70,6 +72,13 @@ public class ClienteController {
         if(email == null || !email.matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")){
             System.out.println("Email inválido");
             String erroMessage = "Invalid Email";
+            return new ResponseEntity<>(erroMessage, HttpStatus.BAD_REQUEST);
+        }
+        String senha = clienteBody.getSenha();
+        System.out.println(senha);
+        if(senha == null || !SenhaUtils.senhaValida(senha)){
+            System.out.println("Senha inválida");
+            String erroMessage = new ClienteException.InvalidPasswordException().getMessage();
             return new ResponseEntity<>(erroMessage, HttpStatus.BAD_REQUEST);
         }
         Cliente cliente = repository.save(clienteBody);

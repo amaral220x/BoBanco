@@ -43,9 +43,9 @@ public class DatabaseInitializer implements CommandLineRunner {
     // }    
 
     public static List<Cliente> clientes = List.of(
-        new Cliente(new Cpf("178.111.111-39"), "Gabriel", new Email("biel.ilha@gmail.com"), "Rua dos Bobos, 0", 4500.00),
-        new Cliente(new Cpf("195.111.111-06"), "Rafaela", new Email("rafinha@gmail.com"), "Rua dos Bobos, 0", 5000.00),
-        new Cliente(new Cpf("111.111.111-11"), "João", new Email("joao@gmail.com"), "Rua dos Bobos, 1", 5000.00)
+        new Cliente(new Cpf("178.111.111-39"), "Gabriel", new Email("biel.ilha@gmail.com"), "111111","Rua dos Bobos, 0", 4500.00),
+        new Cliente(new Cpf("195.111.111-06"), "Rafaela", new Email("rafinha@gmail.com"), "222222","Rua dos Bobos, 0", 5000.00),
+        new Cliente(new Cpf("111.111.111-11"), "João", new Email("joao@gmail.com"), "333333","Rua dos Bobos, 1", 5000.00)
     );
 
 }

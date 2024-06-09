@@ -11,5 +11,11 @@ public class ClienteException extends RuntimeException{
             super("Cliente já cadastrado");
         }
     }
+
+    public static class InvalidPasswordException extends ClienteException {
+        public InvalidPasswordException() {
+            super("Senha inválida");
+        }
+    }
     
 }
