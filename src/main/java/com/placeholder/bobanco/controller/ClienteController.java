@@ -19,8 +19,10 @@ import com.placeholder.bobanco.utils.SenhaUtils;
 import com.placeholder.bobanco.BobancoApplication;
 import com.placeholder.bobanco.exception.ClienteException;
 import com.placeholder.bobanco.model.entity.Cliente;
+import com.placeholder.bobanco.model.entity.Conta;
 import com.placeholder.bobanco.model.value.Cpf;
 import com.placeholder.bobanco.model.value.Email;
+import com.placeholder.bobanco.model.entity.ContaCorrente;
 
 
 import java.util.List;
@@ -65,7 +67,8 @@ public class ClienteController {
             Map<String, String> response = Map.of("message", "Cliente não logado");
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
-        Map<String, String> response = Map.of("message", "Cliente logado" + BobancoApplication.getClienteLogado().getNome());
+        Cliente clienteLogado = repository.findByCpf(BobancoApplication.getClienteLogado()).get();
+        Map<String, String> response = Map.of("message", "Cliente logado " + clienteLogado.getNome());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
     @GetMapping("/logout")
@@ -78,7 +81,21 @@ public class ClienteController {
         Map<String, String> response = Map.of("message", "Cliente deslogado");
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
-
+    @GetMapping("/saldo")
+    public ResponseEntity <Object> getSaldo(){
+        if(BobancoApplication.getClienteLogado() == null){
+            Map<String, String> response = Map.of("message", "Cliente não logado");
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+        Cliente clienteLogado = repository.findByCpf(BobancoApplication.getClienteLogado()).get();
+        if(clienteLogado.getConta() == null){
+            Map<String, String> response = Map.of("message", "Cliente não possui conta");
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+        double saldo = clienteLogado.getConta().getSaldo();
+        Map<String, Double> response = Map.of("saldo", saldo);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 
     @PostMapping("/")
     public ResponseEntity<Object> create(@RequestBody Cliente clienteBody){
@@ -143,11 +160,51 @@ public class ClienteController {
             Map<String, String> response = Map.of("message", erroMessage);
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
-        BobancoApplication.setClienteLogado(cliente.get());
+        BobancoApplication.setClienteLogado(cliente.get().getCpf());
         Map<String, String> response = Map.of("message", "Cliente logado");
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
-    
+    @PostMapping("/conta/{cpf}")
+    public ResponseEntity<Object> createConta(@PathVariable String cpf, @RequestBody Map<String, String> requestBody) throws IllegalAccessException{
+        Cpf cpfObj = new Cpf(cpf);
+        Optional<Cliente> cliente = repository.findByCpf(cpfObj);
+        if(cliente.isEmpty()){
+            System.out.println("Cliente não encontrado");
+            Map<String, String> response = Map.of("message", "Cliente não encontrado");
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+        Cliente clienteObj = cliente.get();
+
+        if(clienteObj.getConta() != null){
+            System.out.println("Cliente já possui conta");
+            Map<String, String> response = Map.of("message", "Cliente já possui conta");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+        double saldo = 0;
+        if(requestBody.containsKey("saldo")){
+            String saldoStr = requestBody.get("saldo");
+            
+            if(saldoStr == null || Double.parseDouble(saldoStr) < 0){
+                System.out.println("Saldo inválido");
+                Map<String, String> response = Map.of("message", "Saldo inválido");
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+            }
+            saldo = Double.parseDouble(saldoStr);
+        }
+
+        if(clienteObj.getRendaMensal() > 2500){
+            double limiteChequeEspecial = 500;
+            ContaCorrente conta = new ContaCorrente(saldo, clienteObj, limiteChequeEspecial);
+            clienteObj.setConta(conta);
+        }
+        else{
+            ContaCorrente conta = new ContaCorrente(saldo, clienteObj, 0);
+            clienteObj.setConta(conta);
+        }
+        repository.save(clienteObj);
+        Map<String, String> response = Map.of("message", "Conta criada");
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
 
     @PatchMapping("/update/{cpf}")
     public ResponseEntity<Object> update(@PathVariable String cpf, @RequestBody Map<String, String> requestBody) throws IllegalAccessException{
@@ -218,6 +275,44 @@ public class ClienteController {
         repository.save(clienteObj);
         Map<String, String> response = Map.of("message", "Cliente atualizado");
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+    @PatchMapping("/transferencia/{cpfDestino}")
+    public ResponseEntity<Object> pix(@PathVariable String cpfDestino, @RequestBody Map<String, String> requestBody){
+        if(BobancoApplication.getClienteLogado() == null){
+            Map<String, String> response = Map.of("message", "Cliente não logado");
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+        Cliente clienteLogado = repository.findByCpf(BobancoApplication.getClienteLogado()).get();
+        if(clienteLogado.getConta() == null){
+            Map<String, String> response = Map.of("message", "Cliente não possui conta");
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+        if(!(clienteLogado.getConta() instanceof ContaCorrente)){
+            Map<String, String> response = Map.of("message", "Cliente não possui conta corrente");
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+        ContaCorrente contaOrigem = (ContaCorrente) clienteLogado.getConta();
+        Cpf cpfDestinoObj = new Cpf(cpfDestino);
+        Optional<Cliente> clienteDestino = repository.findByCpf(cpfDestinoObj);
+        if(clienteDestino.isEmpty()){
+            System.out.println("Cliente destino não encontrado");
+            Map<String, String> response = Map.of("message", "Cliente destino não encontrado");
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+        Cliente clienteDestinoObj = clienteDestino.get();
+        if(clienteDestinoObj.getConta() == null){
+            System.out.println("Cliente destino não possui conta");
+            Map<String, String> response = Map.of("message", "Cliente destino não possui conta");
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+        Conta correnteDestino = clienteDestinoObj.getConta();
+        if(contaOrigem.transferencia(correnteDestino, Double.parseDouble(requestBody.get("valor")))){
+            repository.save(clienteDestinoObj);
+            Map<String, String> response = Map.of("message", "Transferência realizada");
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+        Map<String, String> response = Map.of("message", "Saldo insuficiente");
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     @DeleteMapping("/delete/{cpf}")

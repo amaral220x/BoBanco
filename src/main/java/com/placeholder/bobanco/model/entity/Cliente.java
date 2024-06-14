@@ -1,10 +1,13 @@
 package com.placeholder.bobanco.model.entity;
 
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.CascadeType;
 
 import org.hibernate.annotations.UuidGenerator;
 
@@ -12,6 +15,7 @@ import org.hibernate.annotations.UuidGenerator;
 import com.placeholder.bobanco.model.value.Cpf;
 import com.placeholder.bobanco.model.value.Email;
 import com.placeholder.bobanco.utils.SenhaUtils;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.placeholder.bobanco.exception.ClienteException;
 
 import java.util.UUID;
@@ -35,6 +39,10 @@ public class Cliente {
     private String senha;
     private String endereco; 
     private double rendaMensal;
+    @OneToOne(mappedBy = "cliente", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "conta_id")
+    @JsonManagedReference
+    private Conta conta;
 
     public Cliente() {
     }
@@ -109,6 +117,14 @@ public class Cliente {
     public String toString() {
         return "Cliente [cpf=" +cpf+ ", email=" + email +", endereco=" + endereco + ", nome=" + nome + ", rendaMensal="
                 + rendaMensal + "]";
+    }
+
+    public void setConta(Conta conta) {
+        this.conta = conta;
+    }
+
+    public Conta getConta() {
+        return conta;
     }
 
 }

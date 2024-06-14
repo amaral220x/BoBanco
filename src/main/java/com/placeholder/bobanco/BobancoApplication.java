@@ -8,6 +8,8 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
 import org.springframework.web.bind.annotation.RestController;
 
 import com.placeholder.bobanco.model.entity.Cliente;
+import com.placeholder.bobanco.model.value.Cpf;
+import com.placeholder.bobanco.repository.ClienteRepository;
 
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -15,7 +17,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 @RestController
 public class BobancoApplication {
 
-	static Cliente clienteLogado = null;
+	static Cpf cpfLogado = null;
 
 	public static void main(String[] args) {
 		SpringApplication.run(BobancoApplication.class, args);
@@ -26,11 +28,11 @@ public class BobancoApplication {
 	// 	return "Hello World!";
 	// }
 
-	public static void setClienteLogado(Cliente cliente) {
-		clienteLogado = cliente;
+	public static void setClienteLogado(Cpf cpf) {
+		cpfLogado = cpf;
 	}
-	public static Cliente getClienteLogado() {
-		return clienteLogado;
+	public static Cpf getClienteLogado() {
+		return cpfLogado;
 	}
 
 }
