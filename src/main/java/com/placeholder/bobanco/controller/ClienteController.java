@@ -299,6 +299,10 @@ public class ClienteController {
             aux = 2;
         }
         Cpf cpfDestinoObj = new Cpf(cpfDestino);
+        if (cpfDestinoObj == clienteLogado.getCpf()){
+            Map<String, String> response = Map.of("message", "Transferência para a mesma conta");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
         Optional<Cliente> clienteDestino = repository.findByCpf(cpfDestinoObj);
         if(clienteDestino.isEmpty()){
             Map<String, String> response = Map.of("message", "Cliente destino não encontrado");
@@ -337,6 +341,8 @@ public class ClienteController {
                 }
             }
         }
+        clienteLogado.addTransacao("Transferência para " + cpfDestino.toString(), "-" + valorStr);
+        clienteDestinoObj.addTransacao("Transferência de " + clienteLogado.getCpf().toString(), "+" + valorStr);
         repository.save(clienteLogado);
         repository.save(clienteDestinoObj);
         Map<String, String> response = Map.of("message", "Transferência realizada");

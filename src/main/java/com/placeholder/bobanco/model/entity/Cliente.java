@@ -10,7 +10,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.CascadeType;
 
 import org.hibernate.annotations.UuidGenerator;
-
+import org.hibernate.mapping.List;
 
 import com.placeholder.bobanco.model.value.Cpf;
 import com.placeholder.bobanco.model.value.Email;
@@ -19,6 +19,8 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.placeholder.bobanco.exception.ClienteException;
 
 import java.util.UUID;
+import java.util.Map;
+import java.util.ArrayList;
 
 
 @Entity
@@ -43,6 +45,7 @@ public class Cliente {
     @JoinColumn(name = "conta_id")
     @JsonManagedReference
     private Conta conta;
+    private ArrayList<Map <String, String>> transacoes = new ArrayList<Map<String, String>>();
 
     public Cliente() {
     }
@@ -88,9 +91,14 @@ public class Cliente {
         return rendaMensal;
     }
 
+    public ArrayList<Map<String, String>> getTransacoes() {
+        return transacoes;
+    }
+
     public void setNome(String nome) {
         this.nome = nome;
     }
+
 
 
     public void setEndereco(String endereco) {
@@ -113,6 +121,7 @@ public class Cliente {
         this.senha = senha;
     }
 
+
     @Override
     public String toString() {
         return "Cliente [cpf=" +cpf+ ", email=" + email +", endereco=" + endereco + ", nome=" + nome + ", rendaMensal="
@@ -127,4 +136,8 @@ public class Cliente {
         return conta;
     }
 
+    public void addTransacao(String identificador, String valor){
+        Map<String, String> transacao = Map.of(identificador, valor);
+        this.transacoes.add(transacao);
+    }
 }
