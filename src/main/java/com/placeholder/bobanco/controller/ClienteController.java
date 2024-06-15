@@ -28,6 +28,7 @@ import com.placeholder.bobanco.model.entity.ContaPagamento;
 
 
 import java.util.List;
+import java.util.ArrayList;
 import java.lang.reflect.Field;
 import java.util.Optional; 
 import java.util.UUID;
@@ -146,6 +147,21 @@ public class ClienteController {
         Cliente cliente = repository.save(clienteBody);
         return new ResponseEntity<>(cliente, HttpStatus.CREATED);
     }
+    @GetMapping("/extrato")
+    public ResponseEntity<Object> extrato(){
+        if(BobancoApplication.getClienteLogado() == null){
+            Map<String, String> response = Map.of("message", "Cliente não logado");
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+        Cliente clienteLogado = repository.findByCpf(BobancoApplication.getClienteLogado()).get();
+        if(clienteLogado.getConta() == null){
+            Map<String, String> response = Map.of("message", "Cliente não possui conta");
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+        ArrayList<Map<String, String>> transacoes = clienteLogado.getTransacoes();
+        return new ResponseEntity<>(transacoes, HttpStatus.OK);
+    }
+
     @PostMapping("/login")
     public ResponseEntity<Object> login(@RequestBody Cliente clienteBody){
         Optional<Cliente> cliente = repository.findByCpf(clienteBody.getCpf());
@@ -299,7 +315,7 @@ public class ClienteController {
             aux = 2;
         }
         Cpf cpfDestinoObj = new Cpf(cpfDestino);
-        if (cpfDestinoObj == clienteLogado.getCpf()){
+        if (cpfDestinoObj.equals(clienteLogado.getCpf())){
             Map<String, String> response = Map.of("message", "Transferência para a mesma conta");
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }

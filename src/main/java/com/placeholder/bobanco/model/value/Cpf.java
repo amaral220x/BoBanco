@@ -29,5 +29,17 @@ public class Cpf {
     public String toString() {
         return cpf;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (obj.getClass() != this.getClass()) {
+            return false;
+        }
+        Cpf other = (Cpf) obj;
+        return this.cpf.equals(other.cpf);
+    }
     
 }
