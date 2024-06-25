@@ -38,11 +38,12 @@ public class ContaCorrente extends Conta {
     }
 
     @Override
-    public void sacar(double valor) {
+    public boolean sacar(double valor) {
         if (valor > this.getSaldo() + this.limiteChequeEspecial) {
-            throw new IllegalArgumentException("Saldo insuficiente");
+            return false;
         }
         this.setSaldo(this.getSaldo() - valor);
+        return true;
     }
 
 

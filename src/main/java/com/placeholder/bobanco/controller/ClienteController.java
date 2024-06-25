@@ -387,6 +387,7 @@ public class ClienteController {
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
         clienteLogado.getConta().depositar(valor);
+        clienteLogado.addTransacao("Depósito", "+" + valorStr);
         repository.save(clienteLogado);
         Map<String, String> response = Map.of("message", "Depósito realizado");
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -423,19 +424,20 @@ public class ClienteController {
         if(aux > 0){
             if(aux == 1){
                 ContaPagamento contaPagamento = (ContaPagamento) clienteLogado.getConta();
-                if(!contaPagamento.transferencia(null, valor)){
+                if(!contaPagamento.sacar(valor)){
                     Map<String, String> response = Map.of("message", "Saldo insuficiente");
                     return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
                 }
             }
             if(aux == 2){
                 ContaCorrente contaCorrente = (ContaCorrente) clienteLogado.getConta();
-                if(!contaCorrente.transferencia(null, valor)){
+                if(!contaCorrente.sacar(valor)){
                     Map<String, String> response = Map.of("message", "Saldo insuficiente");
                     return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
                 }
             }
         }
+        clienteLogado.addTransacao("Saque", "-" + valorStr);
         repository.save(clienteLogado);
         Map<String, String> response = Map.of("message", "Saque realizado");
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -472,19 +474,22 @@ public class ClienteController {
         if(aux > 0){
             if(aux == 1){
                 ContaPagamento contaPagamento = (ContaPagamento) clienteLogado.getConta();
-                if(!contaPagamento.transferencia(null, valor)){
+                ContaCorrente foo = new ContaCorrente();
+                if(!contaPagamento.transferencia(foo, valor)){
                     Map<String, String> response = Map.of("message", "Saldo insuficiente");
                     return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
                 }
             }
             if(aux == 2){
                 ContaCorrente contaCorrente = (ContaCorrente) clienteLogado.getConta();
-                if(!contaCorrente.transferencia(null, valor)){
+                ContaCorrente foo = new ContaCorrente();
+                if(!contaCorrente.transferencia(foo, valor)){
                     Map<String, String> response = Map.of("message", "Saldo insuficiente");
                     return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
                 }
             }
         }
+        clienteLogado.addTransacao("Pagamento de conta", "-" + valorStr);
         repository.save(clienteLogado);
         Map<String, String> response = Map.of("message", "Pagamento realizado");
         return new ResponseEntity<>(response, HttpStatus.OK);

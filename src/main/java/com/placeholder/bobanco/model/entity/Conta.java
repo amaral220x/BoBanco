@@ -65,13 +65,11 @@ public abstract class Conta {
         this.saldo += valor;
     }
 
-    public void sacar(double valor) {
+    public boolean sacar(double valor) {
         if (this.saldo < valor) {
-            throw new IllegalArgumentException("Saldo insuficiente");
+            return false;
         }
         this.saldo -= valor;
-    }
-
-
-    
+        return true;
+    }    
 }
